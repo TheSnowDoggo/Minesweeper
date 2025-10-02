@@ -1,11 +1,11 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Minesweeper.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Avalonia.Input;
 
 namespace Minesweeper.Views
 {
@@ -14,7 +14,9 @@ namespace Minesweeper.Views
         private const int Rows    = 15;
         private const int Columns = 15;
 
-        private const string BitmapDirectory = @"C:\Users\redst\Documents\minesweeper_images";
+        private const double RestartDelay = 1.0;
+
+        private const string BitmapDirectory = @"C:\Users\redst\source\repos\Minesweeper\minesweeper_images\";
 
         private const string BitmapDirLinux = @"/home/luna-sparkle/RiderProjects/Minesweeper/minesweeper_images";
 
@@ -23,21 +25,142 @@ namespace Minesweeper.Views
 
         private readonly MineGrid _mineGrid = new(Rows, Columns);
 
-        private readonly Random _rand = new();
-
         private readonly Grid2D<Image> _gridChildren = new(Rows, Columns);
 
         private readonly Dictionary<string, Bitmap> _bitmaps;
+
+        private readonly Stopwatch _restartDelay = new();
+
+        private bool started = false;
+
+        private bool active = true;
 
         public MainWindow()
         {
             InitializeComponent();
             
-            _bitmaps = LoadBitmaps(BitmapDirLinux);
-            
-            _mineGrid.GenerateMines(_rand, 60);
+            _bitmaps = LoadBitmaps(BitmapDirectory);
 
             InitializeGrid(Rows, Columns, RectWidth, RectHeight);
+        }
+
+        private void PointerPressedHandler(object sender, PointerPressedEventArgs args)
+        {
+            var point = args.GetCurrentPoint(sender as Control);
+
+            var gridPosition = new Vec2I()
+            {
+                X = (int)(point.Position.X / RectWidth),
+                Y = (int)(point.Position.Y / RectHeight)
+            };
+
+            if (!active)
+            {
+                if (_restartDelay.Elapsed.TotalSeconds < RestartDelay)
+                {
+                    return;
+                }
+
+                _mineGrid.Reset();
+                UpdateAll();
+
+                started = false;
+
+                _restartDelay.Reset();
+
+                active = true;
+                return;
+            }
+
+            var changed = false;
+
+            if (point.Properties.IsLeftButtonPressed)
+            {
+                if (!started)
+                {
+                    _mineGrid.GenerateGame(gridPosition, 40);
+
+                    UpdateRange(_mineGrid.ClearOut(gridPosition));
+
+                    started = true;
+                    return;
+                }
+
+                changed = _mineGrid.Reveal(gridPosition);
+
+                if (changed && _mineGrid[gridPosition] == CellType.ShownEmpty)
+                {
+                    UpdateRange(_mineGrid.ClearOut(gridPosition));
+
+                    changed = false;
+                }
+
+                if (_mineGrid[gridPosition] == CellType.ShownMine)
+                {
+                    active = false;
+                    _restartDelay.Start();
+
+                    foreach (var position in _mineGrid.HiddenMines)
+                    {
+                        _mineGrid[position] = CellType.ShownMine;
+                        Update(position);
+                    }
+                }
+            }
+
+            if (point.Properties.IsRightButtonPressed)
+            {
+                if (MineGrid.IsFlag(_mineGrid[gridPosition]))
+                {
+                    changed = _mineGrid.RemoveFlag(gridPosition);
+                }
+                else
+                {
+                    changed = _mineGrid.PlaceFlag(gridPosition);
+
+                    if (_mineGrid.InvalidFlags == 0 && _mineGrid.HiddenMines.Count == 0)
+                    {
+                        active = false;
+                        _restartDelay.Start();
+                    }
+                }
+            }
+
+            if (!changed)
+            {
+                return;
+            }
+
+            Update(gridPosition);
+        }
+
+        private void Update(int x, int y)
+        {
+            _gridChildren[x, y].Source = GetBitmap(_mineGrid[x, y]);
+        }
+
+        private void UpdateRange(IEnumerable<Vec2I> collection)
+        {
+            foreach (Vec2I position in collection)
+            {
+                Update(position);
+            }
+        }
+
+        private void Update(Vec2I position)
+        {
+            Update(position.X, position.Y);
+        }
+
+        private void UpdateAll()
+        {
+            for (int y = 0; y < _mineGrid.Height; y++)
+            {
+                for (int x = 0; x < _mineGrid.Width; x++)
+                {
+                    Update(x, y);
+                }
+            }
         }
 
         private Bitmap GetBitmap(CellType cellType)
@@ -61,36 +184,6 @@ namespace Minesweeper.Views
                 _ => throw new NotImplementedException("Unimplimented CellType")
             };
             return bitmap;
-        }
-
-        private void PointerPressedHandler(object sender, PointerPressedEventArgs args)
-        {
-            var point = args.GetCurrentPoint(sender as Control);
-
-            var gridPosition = new Vec2I()
-            {
-                X = (int)(point.Position.X / RectWidth),
-                Y = (int)(point.Position.Y / RectHeight)
-            };
-
-            var changed = false;
-
-            if (point.Properties.IsLeftButtonPressed)
-            {
-                changed = _mineGrid.Reveal(gridPosition);
-            }
-
-            if (point.Properties.IsRightButtonPressed)
-            {
-                changed = _mineGrid.PlaceFlag(gridPosition);
-            }
-
-            if (!changed)
-            {
-                return;
-            }
-            
-            _gridChildren[gridPosition].Source = GetBitmap(_mineGrid[gridPosition]);
         }
 
         private void InitializeGrid(int rows, int columns, int rectHeight, int rectWidth)
