@@ -129,6 +129,20 @@ internal class Grid2D<T>(T[,] data) : IEnumerable<T>,
     }
 
     #endregion
+    
+    #region InRange
+
+    public bool InRange(int x, int y)
+    {
+        return x >= 0 && y >= 0 && x < Width && y < Height;
+    }
+
+    public bool InRange(Vec2I pos)
+    {
+        return InRange(pos.X, pos.Y);
+    }
+    
+    #endregion
 
     public Rect2DI Area()
     {

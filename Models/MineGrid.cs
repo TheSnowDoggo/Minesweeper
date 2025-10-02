@@ -15,6 +15,10 @@ internal enum CellType : byte
     Two,
     Three,
     Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
 }
 
 internal enum RevealResult
@@ -26,6 +30,18 @@ internal enum RevealResult
 
 internal sealed class MineGrid : Grid2D<CellType>
 {
+    private static readonly Vec2I[] Moves =
+    [
+        Vec2I.Up,
+        Vec2I.Down,
+        Vec2I.Left,
+        Vec2I.Right,
+        Vec2I.UpLeft,
+        Vec2I.UpRight,
+        Vec2I.DownLeft,
+        Vec2I.DownRight,
+    ];
+    
     public MineGrid(int width, int height)
         : base(width, height)
     {
@@ -39,12 +55,12 @@ internal sealed class MineGrid : Grid2D<CellType>
         }
     }
 
-    public RevealResult Reveal(int x, int y)
+    public bool Reveal(int x, int y)
     {
         switch (this[x,y])
         {
             case CellType.HiddenEmpty:
-                int count = NeighborCount(x, y);
+                var count = NeighborCount(new Vec2I(x, y));
                 this[x, y] = count switch
                 {
                     0 => CellType.ShownEmpty,
@@ -52,38 +68,42 @@ internal sealed class MineGrid : Grid2D<CellType>
                     2 => CellType.Two,
                     3 => CellType.Three,
                     4 => CellType.Four,
+                    5 => CellType.Five,
+                    6 => CellType.Six,
+                    7 => CellType.Seven,
+                    8 => CellType.Eight,
                     _ => throw new NotImplementedException($"Invalid neighbor count {count}.")
                 };
-                return RevealResult.Empty;
+                return true;
             case CellType.HiddenMine:
                 this[x, y] = CellType.ShownMine;
-                return RevealResult.Mine;
+                return true;
             default:
-                return RevealResult.Invalid;
+                return false;
         }
     }
 
-    public RevealResult Reveal(Vec2I position)
+    public bool Reveal(Vec2I position)
     {
         return Reveal(position.X, position.Y);
     }
 
-    public RevealResult PlaceFlag(int x, int y)
+    public bool PlaceFlag(int x, int y)
     {
         switch (this[x, y])
         {
             case CellType.HiddenEmpty:
                 this[x, y] = CellType.FlagEmpty;
-                return RevealResult.Empty;
+                return true;
             case CellType.HiddenMine:
                 this[x, y] = CellType.FlagMine;
-                return RevealResult.Mine;
+                return true;
             default:
-                return RevealResult.Invalid;
+                return false;
         }
     }
 
-    public RevealResult PlaceFlag(Vec2I position)
+    public bool PlaceFlag(Vec2I position)
     {
         return PlaceFlag(position.X, position.Y);
     }
@@ -93,23 +113,16 @@ internal sealed class MineGrid : Grid2D<CellType>
         return type is CellType.HiddenMine or CellType.ShownMine or CellType.FlagMine;
     }
 
-    private int NeighborCount(int x, int y)
+    private int NeighborCount(Vec2I pos)
     {
-        int count = 0;
-        if (x > 0 && IsMine(this[x - 1, y]))
+        var count = 0;
+        foreach (var move in Moves)
         {
-            count++;
-        }
-        if (x < Width - 1 && IsMine(this[x + 1, y]))
-        {
-            count++;
-        }
-        if (y > 0 && IsMine(this[x, y - 1]))
-        {
-            count++;
-        }
-        if (y < Height - 1 && IsMine(this[x, y + 1]))
-        {
+            var next = pos + move;
+            if (!InRange(next) || !IsMine(this[next]))
+            {
+                continue;
+            }
             count++;
         }
         return count;
