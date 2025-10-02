@@ -3,7 +3,9 @@ using Avalonia.Media.Imaging;
 using Minesweeper.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using Avalonia.Input;
 
 namespace Minesweeper.Views
 {
@@ -13,6 +15,8 @@ namespace Minesweeper.Views
         private const int Columns = 35;
 
         private const string BitmapDirectory = @"C:\Users\redst\Documents\minesweeper_images";
+
+        private const string BitmapDirLinux = @"/home/luna-sparkle/RiderProjects/Minesweeper/minesweeper_images";
 
         private const int RectWidth  = 20;
         private const int RectHeight = 20;
@@ -31,7 +35,7 @@ namespace Minesweeper.Views
 
             InitializeGrid(Rows, Columns, RectWidth, RectHeight);
 
-            _bitmaps = LoadBitmaps(BitmapDirectory);
+            _bitmaps = LoadBitmaps(BitmapDirLinux);
 
             _mineGrid.GenerateMines(_rand, 180);
 
@@ -71,11 +75,18 @@ namespace Minesweeper.Views
             }
         }
 
+        private void PointerPressedHandler(object sender, PointerPressedEventArgs args)
+        {
+            var point = args.GetCurrentPoint(sender as Control);
+        }
+
         private void InitializeGrid(int rows, int columns, int rectHeight, int rectWidth)
         {
             MainGrid.Height = rows    * rectHeight;
             MainGrid.Width  = columns * rectWidth;
 
+            MainGrid.
+            
             //MainGrid.ShowGridLines = true;
 
             for (int j = 0; j < Rows; j++)
@@ -92,7 +103,7 @@ namespace Minesweeper.Views
                     var child = new Image()
                     {
                         Width = RectWidth, Height = RectHeight,
-                        Source = new Bitmap(@"C:\Users\redst\Documents\minesweeper_images\tile_one.png"),
+                        
                     };
 
                     _gridChildren[i, j] = child;
@@ -109,7 +120,7 @@ namespace Minesweeper.Views
         {
             var dict = new Dictionary<string, Bitmap>();
 
-            foreach (var filePath in Directory.EnumerateFiles(directory))
+            foreach (var filePath in Directory.GetFiles(directory))
             {
                 var name = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
