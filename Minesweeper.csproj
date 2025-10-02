@@ -13,6 +13,60 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="minesweeper_tiles\tile_eight.png" />
+    <None Remove="minesweeper_tiles\tile_empty.png" />
+    <None Remove="minesweeper_tiles\tile_five.png" />
+    <None Remove="minesweeper_tiles\tile_flag.png" />
+    <None Remove="minesweeper_tiles\tile_four.png" />
+    <None Remove="minesweeper_tiles\tile_hidden.png" />
+    <None Remove="minesweeper_tiles\tile_mine.png" />
+    <None Remove="minesweeper_tiles\tile_one.png" />
+    <None Remove="minesweeper_tiles\tile_seven.png" />
+    <None Remove="minesweeper_tiles\tile_six.png" />
+    <None Remove="minesweeper_tiles\tile_three.png" />
+    <None Remove="minesweeper_tiles\tile_two.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="minesweeper_tiles\tile_eight.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_empty.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_five.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_flag.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_four.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_hidden.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_mine.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_one.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_seven.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_six.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_three.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="minesweeper_tiles\tile_two.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.0" />
     <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />

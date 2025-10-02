@@ -7,7 +7,9 @@
         x:Class="Minesweeper.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Minesweeper">
+        Title="Minesweeper"
+		MinWidth="640" MinHeight="640"
+		MaxWidth="640" MaxHeight="640">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,

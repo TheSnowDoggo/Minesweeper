@@ -11,14 +11,14 @@ namespace Minesweeper.Views
 {
     public partial class MainWindow : Window
     {
-        private const int Rows    = 15;
-        private const int Columns = 15;
+        private const string TileDirectory = "minesweeper_tiles";
 
         private const double RestartDelay = 1.0;
 
-        private const string BitmapDirectory = @"C:\Users\redst\source\repos\Minesweeper\minesweeper_images\";
+        private const int Mines   = 70;
 
-        private const string BitmapDirLinux = @"/home/luna-sparkle/RiderProjects/Minesweeper/minesweeper_images";
+        private const int Rows    = 16;
+        private const int Columns = 16;
 
         private const int RectWidth  = 40;
         private const int RectHeight = 40;
@@ -39,7 +39,7 @@ namespace Minesweeper.Views
         {
             InitializeComponent();
             
-            _bitmaps = LoadBitmaps(BitmapDirectory);
+            _bitmaps = LoadBitmaps(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TileDirectory));
 
             InitializeGrid(Rows, Columns, RectWidth, RectHeight);
         }
@@ -78,7 +78,7 @@ namespace Minesweeper.Views
             {
                 if (!started)
                 {
-                    _mineGrid.GenerateGame(gridPosition, 40);
+                    _mineGrid.GenerateGame(gridPosition, Mines);
 
                     UpdateRange(_mineGrid.ClearOut(gridPosition));
 
