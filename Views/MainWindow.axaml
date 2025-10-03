@@ -8,8 +8,8 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="Minesweeper"
-		MinWidth="640" MinHeight="640"
-		MaxWidth="640" MaxHeight="640">
+		MinWidth="640" MinHeight="700"
+		MaxWidth="640" MaxHeight="700">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -17,7 +17,12 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-	<Grid Name = "MainGrid"
-          PointerPressed="PointerPressedHandler">
-	</Grid>
+	<StackPanel>
+		<Menu>
+			<MenuItem Header="Options"></MenuItem>
+		</Menu>
+		<Grid Name = "MainGrid"
+		      PointerPressed="PointerPressedHandler">
+		</Grid>
+	</StackPanel>
     </Window>
