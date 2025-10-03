@@ -22,7 +22,9 @@
 			<MenuItem Header="Options"></MenuItem>
 		</Menu>
 		<Grid Name = "MainGrid"
-		      PointerPressed="PointerPressedHandler">
+		      PointerPressed="PointerPressedHandler"
+		      KeyDown="KeyDownHandler"
+		      KeyUp="KeyUpHandler">
 		</Grid>
 	</StackPanel>
     </Window>

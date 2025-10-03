@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Avalonia.Interactivity;
 
 namespace Minesweeper.Views;
 
@@ -35,9 +36,14 @@ public partial class MainWindow : Window
 
         private bool _active = true;
 
+        private bool _control = false;
+
         public MainWindow()
         {
             InitializeComponent();
+            
+            AddHandler(KeyDownEvent, KeyDownHandler, RoutingStrategies.Tunnel);
+            AddHandler(KeyUpEvent  , KeyUpHandler  , RoutingStrategies.Tunnel);
             
             _bitmaps = LoadBitmaps(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TileDirectory));
 
@@ -75,7 +81,7 @@ public partial class MainWindow : Window
 
             var update = false;
 
-            if (point.Properties.IsLeftButtonPressed)
+            if (point.Properties.IsLeftButtonPressed && _control)
             {
                 // Start game
                 if (!_started)
@@ -87,7 +93,7 @@ public partial class MainWindow : Window
                     _started = true;
                     return;
                 }
-
+                
                 update = _mineGrid.Reveal(gridPosition);
 
                 if (update && _mineGrid[gridPosition] == CellType.ShownEmpty)
@@ -134,6 +140,22 @@ public partial class MainWindow : Window
             }
 
             Update(gridPosition);
+        }
+
+        private void KeyDownHandler(object? sender, KeyEventArgs args)
+        {
+            if (args.Key == Key.LeftCtrl)
+            {
+                _control = true;
+            }
+        }
+        
+        private void KeyUpHandler(object? sender, KeyEventArgs args)
+        {
+            if (args.Key == Key.LeftCtrl)
+            {
+                _control = false;
+            }
         }
 
         private void Update(int x, int y)
