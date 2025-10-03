@@ -78,4 +78,10 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\GameGrid.axaml.cs">
+      <DependentUpon>GameGrid.axaml.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

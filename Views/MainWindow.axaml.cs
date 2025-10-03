@@ -7,15 +7,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace Minesweeper.Views
-{
-    public partial class MainWindow : Window
+namespace Minesweeper.Views;
+
+public partial class MainWindow : Window
     {
         private const string TileDirectory = "minesweeper_tiles";
 
         private const double RestartDelay = 1.0;
 
-        private const int Mines   = 70;
+        private const int Mines   = 60;
 
         private const int Rows    = 16;
         private const int Columns = 16;
@@ -31,9 +31,9 @@ namespace Minesweeper.Views
 
         private readonly Stopwatch _restartDelay = new();
 
-        private bool started = false;
+        private bool _started = false;
 
-        private bool active = true;
+        private bool _active = true;
 
         public MainWindow()
         {
@@ -50,11 +50,12 @@ namespace Minesweeper.Views
 
             var gridPosition = new Vec2I()
             {
-                X = (int)(point.Position.X / RectWidth),
+                X = (int)(point.Position.X / RectWidth ),
                 Y = (int)(point.Position.Y / RectHeight)
             };
 
-            if (!active)
+            // Reset game
+            if (!_active)
             {
                 if (_restartDelay.Elapsed.TotalSeconds < RestartDelay)
                 {
@@ -64,40 +65,41 @@ namespace Minesweeper.Views
                 _mineGrid.Reset();
                 UpdateAll();
 
-                started = false;
+                _started = false;
 
                 _restartDelay.Reset();
 
-                active = true;
+                _active = true;
                 return;
             }
 
-            var changed = false;
+            var update = false;
 
             if (point.Properties.IsLeftButtonPressed)
             {
-                if (!started)
+                // Start game
+                if (!_started)
                 {
                     _mineGrid.GenerateGame(gridPosition, Mines);
 
                     UpdateRange(_mineGrid.ClearOut(gridPosition));
 
-                    started = true;
+                    _started = true;
                     return;
                 }
 
-                changed = _mineGrid.Reveal(gridPosition);
+                update = _mineGrid.Reveal(gridPosition);
 
-                if (changed && _mineGrid[gridPosition] == CellType.ShownEmpty)
+                if (update && _mineGrid[gridPosition] == CellType.ShownEmpty)
                 {
                     UpdateRange(_mineGrid.ClearOut(gridPosition));
 
-                    changed = false;
+                    update = false;
                 }
 
                 if (_mineGrid[gridPosition] == CellType.ShownMine)
                 {
-                    active = false;
+                    _active = false;
                     _restartDelay.Start();
 
                     foreach (var position in _mineGrid.HiddenMines)
@@ -112,21 +114,21 @@ namespace Minesweeper.Views
             {
                 if (MineGrid.IsFlag(_mineGrid[gridPosition]))
                 {
-                    changed = _mineGrid.RemoveFlag(gridPosition);
+                    update = _mineGrid.RemoveFlag(gridPosition);
                 }
                 else
                 {
-                    changed = _mineGrid.PlaceFlag(gridPosition);
+                    update = _mineGrid.PlaceFlag(gridPosition);
 
                     if (_mineGrid.InvalidFlags == 0 && _mineGrid.HiddenMines.Count == 0)
                     {
-                        active = false;
+                        _active = false;
                         _restartDelay.Start();
                     }
                 }
             }
 
-            if (!changed)
+            if (!update)
             {
                 return;
             }
@@ -234,4 +236,3 @@ namespace Minesweeper.Views
             return dict;
         }
     }
-}
