@@ -7,9 +7,7 @@
         x:Class="Minesweeper.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Minesweeper"
-		MinWidth="640" MinHeight="700"
-		MaxWidth="640" MaxHeight="700">
+        Title="Minesweeper">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -18,13 +16,25 @@
     </Design.DataContext>
 
 	<StackPanel>
-		<Menu>
-			<MenuItem Header="Options"></MenuItem>
-		</Menu>
+		<Grid RowDefinitions="35"
+			  ColumnDefinitions="100,auto">
+			<ComboBox Grid.Row="0"
+					  Grid.Column="0"
+					  MinWidth="100"
+					  SelectedIndex="1"
+					  SelectionChanged="Combobox_SelectedChanged">
+				<ComboBoxItem>Easy</ComboBoxItem>
+				<ComboBoxItem>Medium</ComboBoxItem>
+				<ComboBoxItem>Hard</ComboBoxItem>
+			</ComboBox>
+			<TextBlock Grid.Row="0"
+					   Grid.Column="1"
+				Name="InfoText"
+				FontSize="20">
+			</TextBlock>
+		</Grid>
 		<Grid Name = "MainGrid"
-		      PointerPressed="PointerPressedHandler"
-		      KeyDown="KeyDownHandler"
-		      KeyUp="KeyUpHandler">
+		      PointerPressed="PointerPressedHandler">
 		</Grid>
 	</StackPanel>
     </Window>

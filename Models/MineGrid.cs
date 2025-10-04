@@ -46,6 +46,8 @@ internal sealed class MineGrid : Grid2D<CellType>
 
     private int _invalidFlags = 0;
 
+    private int _mines = 0;
+
     public MineGrid(int width, int height)
         : base(width, height)
     {
@@ -53,7 +55,11 @@ internal sealed class MineGrid : Grid2D<CellType>
 
     public HashSet<Vec2I> HiddenMines { get; } = [];
 
+    public int Mines => _mines;
+
     public int InvalidFlags => _invalidFlags;
+
+    public int FlagsRemaining => HiddenMines.Count - InvalidFlags;
 
     public static bool IsFlag(CellType cellType)
     {
@@ -69,6 +75,7 @@ internal sealed class MineGrid : Grid2D<CellType>
     {
         Clear();
         HiddenMines.Clear();
+        _mines = 0;
         _invalidFlags = 0;
     }
 
@@ -76,7 +83,11 @@ internal sealed class MineGrid : Grid2D<CellType>
     {
         HiddenMines.Clear();
 
-        foreach (Vec2I position in GeneratePositions(start, mines))
+        var positions = GeneratePositions(start, mines);
+
+        _mines = positions.Count;
+
+        foreach (Vec2I position in positions)
         {
             this[position] = CellType.HiddenMine;
             HiddenMines.Add(position);
