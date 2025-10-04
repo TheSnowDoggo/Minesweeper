@@ -12,33 +12,19 @@ namespace Minesweeper.Views;
 
 public partial class MainWindow : Window
 {
-    private class GameInfo(int rows, int columns, int mines)
-    {
-        public int Rows    { get; } = rows;
-        public int Columns { get; } = columns;
-        public int Mines   { get; } = mines;
-    }
-
     private const string TileDirectory = "minesweeper_tiles";
 
     private const double RestartDelay = 1.0;
 
     private const Key LockKey = Key.Q;
 
-    private const int Mines   = 60;
+    private const int Mines   = 55;
 
     private const int Rows    = 16;
     private const int Columns = 16;
 
     private const int RectWidth  = 40;
     private const int RectHeight = 40;
-
-    private static readonly GameInfo[] DifficultyModes =
-    [
-        new GameInfo(8 , 8 , 10),
-        new GameInfo(16, 16, 40),
-        new GameInfo(16, 30, 99),
-    ];
 
     private readonly MineGrid _mineGrid = new(Rows, Columns);
 
@@ -49,8 +35,6 @@ public partial class MainWindow : Window
     private readonly Stopwatch _restartDelay = new();
 
     private readonly KeyStateLogger _keyState = new();
-
-    private int _difficultyMode = 1;
 
     private bool _started = false;
 
@@ -66,7 +50,7 @@ public partial class MainWindow : Window
 
         _bitmaps = LoadBitmaps(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TileDirectory));
 
-        InitializeGrid();
+        InitializeGrid(Rows, Columns, RectWidth, RectHeight);
 
         InfoText.Text = "Click Anywhere to Start";
     }
@@ -88,7 +72,15 @@ public partial class MainWindow : Window
             {
                 return;
             }
-            ResetGame();
+
+            _mineGrid.Reset();
+            UpdateAll();
+
+            _started = false;
+
+            _restartDelay.Reset();
+
+            _active = true;
             return;
         }
 
@@ -104,7 +96,13 @@ public partial class MainWindow : Window
             // Start game
             if (!_started)
             {
-                StartGame(gridPosition);
+                _mineGrid.GenerateGame(gridPosition, Mines);
+
+                UpdateRange(_mineGrid.ClearOut(gridPosition));
+
+                UpdateFlagInfo();
+
+                _started = true;
                 return;
             }
                 
@@ -147,6 +145,8 @@ public partial class MainWindow : Window
                     _active = false;
                     _restartDelay.Start();
                 }
+
+                InfoText.Text = "You won!";
             }
 
             UpdateFlagInfo();
@@ -212,51 +212,6 @@ public partial class MainWindow : Window
 
     #endregion
 
-    private void ResetGame()
-    {
-        _mineGrid.Reset();
-        UpdateAll();
-
-        _started = false;
-
-        _restartDelay.Reset();
-
-        _active = true;
-    }
-
-    private void StartGame(Vec2I position)
-    {
-        _mineGrid.GenerateGame(position, DifficultyModes[_difficultyMode].Mines);
-
-        UpdateRange(_mineGrid.ClearOut(position));
-
-        UpdateFlagInfo();
-
-        _started = true;
-    }
-
-    private void Combobox_SelectedChanged(object? sender, SelectionChangedEventArgs args)
-    {
-        if (sender is not ComboBox comboBox)
-        {
-            return;
-        }
-
-        if (_started || !_active)
-        {
-            ResetGame();
-        }
-
-        if (comboBox.SelectedIndex == _difficultyMode)
-        {
-            return;
-        }
-
-        _difficultyMode = comboBox.SelectedIndex;
-
-        InitializeGrid();
-    }
-
     private void UpdateFlagInfo()
     {
         InfoText.Text = $"Flags: {_mineGrid.FlagsRemaining}";
@@ -285,23 +240,18 @@ public partial class MainWindow : Window
         return bitmap;
     }
 
-    private void InitializeGrid()
+    private void InitializeGrid(int rows, int columns, int rectHeight, int rectWidth)
     {
-        var mode = DifficultyModes[_difficultyMode];
+        MainGrid.Height = rows    * rectHeight;
+        MainGrid.Width  = columns * rectWidth;
 
-        MainGrid.Height = mode.Rows    * RectHeight;
-        MainGrid.Width  = mode.Columns * RectWidth;
+        //MainGrid.ShowGridLines = true;
 
-        MainGrid.Children.Clear();
-
-        _mineGrid.Resize(mode.Rows, mode.Columns);
-        _gridChildren.Resize(mode.Rows, mode.Columns);
-
-        for (int j = 0; j < mode.Rows; j++)
+        for (int j = 0; j < Rows; j++)
         {
             MainGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
                 
-            for (int i = 0; i < mode.Columns; i++)
+            for (int i = 0; i < Columns; i++)
             {
                 if (j == 0)
                 {
